@@ -27,6 +27,7 @@ def hello() -> str:
         A string with the words 'Hello World!'.
     """
     return "Hello World!"
+    return "testing in editor!"
 
 
 if __name__ == "__main__":
