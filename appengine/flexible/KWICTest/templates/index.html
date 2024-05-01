@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microminer Search</title>
+</head>
+<body>
+    <h1>Microminer Search</h1>
+    <form id="searchForm">
+        <label for="keywords">Enter keywords:</label>
+        <input type="text" id="keywords" name="keywords" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+
+    <h2>Add New Entry</h2>
+    <form id="addEntryForm">
+        <label for="descriptor">Descriptor:</label>
+        <input type="text" id="descriptor" name="descriptor" required><br>
+        <label for="url">URL:</label>
+        <input type="text" id="url" name="url" required><br>
+        <button type="submit">Add Entry</button>
+    </form>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const keywords = document.getElementById('keywords').value.trim().split(/\s+/);
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ keywords })
+            });
+            const data = await response.json();
+            displayResults(data);
+        });
+
+        async function addEntry(event) {
+            event.preventDefault();
+            const descriptor = document.getElementById('descriptor').value.trim();
+            const url = document.getElementById('url').value.trim();
+            const response = await fetch('/add_entry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ descriptor, url })
+            });
+            const result = await response.json();
+            alert(result.message);
+            // Clear form fields after adding entry
+            document.getElementById('descriptor').value = '';
+            document.getElementById('url').value = '';
+        }
+
+        document.getElementById('addEntryForm').addEventListener('submit', addEntry);
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            if (results.length === 0) {
+                resultsDiv.textContent = 'No results found.';
+            } else {
+                results.forEach(result => {
+                    const descriptor = result.descriptor;
+                    const url = result.url;
+                    const resultElement = document.createElement('div');
+                    resultElement.innerHTML = `<strong>${descriptor}</strong> - <a href="${url}" target="_blank">${url}</a>`;
+                    resultsDiv.appendChild(resultElement);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
